@@ -5,14 +5,15 @@ import {
   X,
   Home, 
   Trash2, 
-  CheckCircle,
   Clock,
   Plus,
-  Sparkles
+  Sparkles,
+  Archive
 } from 'lucide-react';
 import { useChatStore } from '../store/chatStore';
 import { useSidebarStore } from '../store/sidebarStore';
 import { useChats, useDeleteChat } from '../hooks/useChat';
+import { cn } from '../lib/utils';
 
 export function Sidebar() {
   const { isCollapsed, toggle } = useSidebarStore();
@@ -37,34 +38,33 @@ export function Sidebar() {
       {/* Mobile overlay */}
       {!isCollapsed && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={toggle}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`
-          fixed top-0 left-0 h-screen z-50
-          bg-[#0f1419] border-r border-[#2a3441]
-          flex flex-col
-          transition-all duration-300
-          ${isCollapsed ? 'w-0 lg:w-16 overflow-hidden' : 'w-64'}
-        `}
+        className={cn(
+          "fixed top-0 left-0 h-screen z-50",
+          "bg-card/50 backdrop-blur-md border-r border-border/50",
+          "flex flex-col transition-all duration-300",
+          isCollapsed ? 'w-0 lg:w-16 overflow-hidden' : 'w-64'
+        )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#2a3441]">
+        <div className="flex items-center justify-between p-4 border-b border-border/50">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[hsl(199,89%,48%)] to-[hsl(262,83%,58%)] flex items-center justify-center flex-shrink-0 glow-primary">
               <Sparkles size={18} className="text-white" />
             </div>
             {!isCollapsed && (
-              <span className="text-white font-semibold text-lg">Codex</span>
+              <span className="text-foreground font-semibold text-lg">Codex</span>
             )}
           </Link>
           <button
             onClick={toggle}
-            className="p-2 rounded-lg hover:bg-[#1a2332] text-slate-400 hover:text-white transition-colors lg:hidden"
+            className="p-2 rounded-lg hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors lg:hidden"
           >
             <X size={20} />
           </button>
@@ -74,7 +74,7 @@ export function Sidebar() {
         <div className="p-3 space-y-1">
           <Link
             to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1a2332] text-slate-300 hover:text-white transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
           >
             <Home size={18} className="flex-shrink-0" />
             {!isCollapsed && <span>Home</span>}
@@ -82,7 +82,7 @@ export function Sidebar() {
           
           <button
             onClick={() => navigate('/')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-emerald-600/20 border border-emerald-600/30 text-emerald-400 hover:bg-emerald-600/30 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors"
           >
             <Plus size={18} className="flex-shrink-0" />
             {!isCollapsed && <span>New Chat</span>}
@@ -90,13 +90,13 @@ export function Sidebar() {
         </div>
 
         {/* Divider */}
-        <div className="mx-4 h-px bg-[#2a3441]" />
+        <div className="mx-4 h-px bg-border/50" />
 
         {/* Chat Lists */}
         <div className="flex-1 overflow-y-auto p-3">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
             <>
@@ -104,9 +104,9 @@ export function Sidebar() {
               {activeChats.length > 0 && (
                 <div className="mb-4">
                   {!isCollapsed && (
-                    <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-500 uppercase">
-                      <Clock size={12} />
-                      Active ({activeChats.length})
+                    <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      <MessageSquare size={12} />
+                      Active Chats
                     </div>
                   )}
                   {activeChats.map((chat) => (
@@ -126,9 +126,9 @@ export function Sidebar() {
               {completedChats.length > 0 && (
                 <div>
                   {!isCollapsed && (
-                    <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-500 uppercase">
-                      <CheckCircle size={12} />
-                      Completed ({completedChats.length})
+                    <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      <Archive size={12} />
+                      Archived
                     </div>
                   )}
                   {completedChats.map((chat) => (
@@ -147,11 +147,11 @@ export function Sidebar() {
               {/* Empty State */}
               {chats.length === 0 && !isCollapsed && (
                 <div className="text-center py-8">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#1a2332] flex items-center justify-center">
-                    <MessageSquare size={20} className="text-slate-600" />
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted/50 flex items-center justify-center">
+                    <MessageSquare size={20} className="text-muted-foreground" />
                   </div>
-                  <p className="text-sm text-slate-400">No conversations yet</p>
-                  <p className="text-xs text-slate-500 mt-1">Select a prompt to start</p>
+                  <p className="text-sm text-muted-foreground">No conversations yet</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">Select a prompt to start</p>
                 </div>
               )}
             </>
@@ -162,13 +162,13 @@ export function Sidebar() {
       {/* Mobile menu button */}
       <button
         onClick={toggle}
-        className={`
-          fixed top-4 left-4 z-50 p-2 rounded-lg 
-          bg-[#0f1419] border border-[#2a3441]
-          text-slate-400 hover:text-white
-          transition-all lg:hidden
-          ${isCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-        `}
+        className={cn(
+          "fixed top-4 left-4 z-50 p-2 rounded-lg",
+          "bg-card/80 backdrop-blur-md border border-border/50",
+          "text-muted-foreground hover:text-foreground",
+          "transition-all lg:hidden",
+          isCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        )}
       >
         <Menu size={20} />
       </button>
@@ -193,24 +193,35 @@ function ChatItem({ chat, isActive, isCollapsed, onDelete, onClick }: ChatItemPr
   return (
     <button
       onClick={onClick}
-      className={`
-        w-full flex items-center gap-3 px-3 py-2 rounded-lg mb-1 text-left group
-        transition-colors
-        ${isActive 
-          ? 'bg-violet-600/20 border border-violet-600/30 text-violet-300' 
-          : 'hover:bg-[#1a2332] text-slate-400 hover:text-slate-200'
-        }
-      `}
+      className={cn(
+        "w-full flex items-center gap-3 p-2 rounded-lg mb-1 text-left group transition-all",
+        isActive 
+          ? "bg-primary/10 border border-primary/30" 
+          : "hover:bg-muted/50"
+      )}
     >
-      <MessageSquare size={16} className="flex-shrink-0" />
+      <div
+        className={cn(
+          "w-2 h-2 rounded-full shrink-0",
+          isActive ? "bg-accent" : "bg-muted-foreground/30"
+        )}
+      />
       {!isCollapsed && (
         <>
-          <span className="flex-1 text-sm truncate">{chat.promptName}</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">
+              {chat.promptName}
+            </p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <Clock size={10} />
+              {chat.messageCount || 0} messages
+            </p>
+          </div>
           <button
             onClick={(e) => onDelete(e, chat.id)}
-            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded transition-all"
+            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/20 rounded transition-all"
           >
-            <Trash2 size={14} className="text-red-400" />
+            <Trash2 size={14} className="text-destructive" />
           </button>
         </>
       )}

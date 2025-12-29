@@ -1,5 +1,6 @@
-import { User, Bot } from 'lucide-react';
+import { User } from 'lucide-react';
 import type { Message } from '../api/client';
+import { cn } from '../lib/utils';
 
 interface ChatMessageProps {
   message: Message;
@@ -9,33 +10,31 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === 'user';
   
   return (
-    <div
-      className={`
-        flex gap-4 p-5 rounded-2xl animate-fade-in
-        ${isUser 
-          ? 'bg-emerald-500/10 border border-emerald-500/20' 
-          : 'bg-violet-500/10 border border-violet-500/20'
-        }
-      `}
-    >
+    <div className="flex gap-3">
       <div 
-        className={`
-          flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
-          ${isUser 
-            ? 'bg-emerald-500/20 text-emerald-400' 
-            : 'bg-violet-500/20 text-violet-400'
-          }
-        `}
+        className={cn(
+          "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+          isUser 
+            ? "bg-primary/20" 
+            : "bg-gradient-to-br from-[hsl(199,89%,48%)] to-[hsl(262,83%,58%)]"
+        )}
       >
-        {isUser ? <User size={20} /> : <Bot size={20} />}
+        {isUser ? (
+          <User size={16} className="text-primary" />
+        ) : (
+          <span className="text-xs font-bold text-white">AI</span>
+        )}
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-2">
-          <span className={`text-sm font-semibold ${isUser ? 'text-emerald-400' : 'text-violet-400'}`}>
+        <div className="flex items-center gap-2 mb-1">
+          <span className={cn(
+            "text-sm font-medium",
+            isUser ? "text-primary" : "text-secondary"
+          )}>
             {isUser ? 'You' : 'Assistant'}
           </span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-muted-foreground">
             {new Date(message.createdAt).toLocaleTimeString([], { 
               hour: '2-digit', 
               minute: '2-digit' 
@@ -43,8 +42,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </span>
         </div>
         
-        <div className="prose text-slate-200 whitespace-pre-wrap leading-relaxed">
-          {message.content}
+        <div 
+          className={cn(
+            "rounded-2xl p-3 text-sm text-foreground/90",
+            isUser 
+              ? "bg-primary/20 border border-primary/30 rounded-tl-md" 
+              : "bg-muted/50 rounded-tl-md"
+          )}
+        >
+          <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
         </div>
       </div>
     </div>
@@ -57,24 +63,26 @@ interface StreamingMessageProps {
 
 export function StreamingMessage({ content }: StreamingMessageProps) {
   return (
-    <div className="flex gap-4 p-5 rounded-2xl bg-violet-500/10 border border-violet-500/20 animate-fade-in">
-      <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center bg-violet-500/20 text-violet-400">
-        <Bot size={20} />
+    <div className="flex gap-3">
+      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(199,89%,48%)] to-[hsl(262,83%,58%)] flex items-center justify-center shrink-0">
+        <span className="text-xs font-bold text-white">AI</span>
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-sm font-semibold text-violet-400">Assistant</span>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-sm font-medium text-secondary">Assistant</span>
           <div className="flex gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 loading-dot" />
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 loading-dot" />
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 loading-dot" />
+            <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
           </div>
         </div>
         
-        <div className="prose text-slate-200 whitespace-pre-wrap leading-relaxed">
-          {content || 'Thinking...'}
-          <span className="inline-block w-0.5 h-5 bg-violet-400 ml-1 animate-pulse" />
+        <div className="bg-muted/50 rounded-2xl rounded-tl-md p-3 text-sm text-foreground/90">
+          <p className="whitespace-pre-wrap leading-relaxed">
+            {content || 'Thinking...'}
+            <span className="inline-block w-0.5 h-4 bg-secondary ml-1 animate-pulse" />
+          </p>
         </div>
       </div>
     </div>

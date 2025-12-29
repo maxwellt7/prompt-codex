@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -36,46 +37,43 @@ export function ChatInput({ onSend, disabled, placeholder = 'Type your message..
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-1.5 focus-within:border-slate-700 transition-colors">
-        <div className="flex items-end gap-2">
-          <textarea
-            ref={textareaRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            disabled={disabled}
-            rows={1}
-            className="
-              flex-1 bg-transparent text-slate-100 placeholder-slate-500
-              px-4 py-3 resize-none
-              focus:outline-none
-              disabled:opacity-50 disabled:cursor-not-allowed
-            "
-          />
-          
-          <button
-            type="submit"
-            disabled={!message.trim() || disabled}
-            className="
-              p-3 rounded-xl 
-              bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
-              hover:bg-emerald-500/30 hover:text-emerald-300
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-500/20
-              transition-all duration-200
-              flex items-center justify-center
-            "
-          >
-            {disabled ? (
-              <Loader2 size={20} className="animate-spin" />
-            ) : (
-              <Send size={20} />
-            )}
-          </button>
-        </div>
+      <div className="flex items-end gap-2 bg-muted/30 rounded-xl p-2 border border-border/50 focus-within:border-primary/30 transition-colors">
+        <textarea
+          ref={textareaRef}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          disabled={disabled}
+          rows={1}
+          className="
+            flex-1 bg-transparent text-foreground placeholder:text-muted-foreground
+            px-3 py-2 resize-none
+            focus:outline-none
+            disabled:opacity-50 disabled:cursor-not-allowed
+          "
+        />
+        
+        <button
+          type="submit"
+          disabled={!message.trim() || disabled}
+          className={cn(
+            "p-3 rounded-lg transition-all duration-200 flex items-center justify-center shrink-0",
+            "bg-muted/50 backdrop-blur-md border border-border/50",
+            "hover:bg-primary/20 hover:border-primary/30 hover:text-primary",
+            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-muted/50 disabled:hover:border-border/50 disabled:hover:text-muted-foreground",
+            message.trim() && !disabled ? "text-primary" : "text-muted-foreground"
+          )}
+        >
+          {disabled ? (
+            <Loader2 size={20} className="animate-spin" />
+          ) : (
+            <Send size={20} />
+          )}
+        </button>
       </div>
       
-      <p className="text-xs text-slate-600 mt-2 text-center">
+      <p className="text-xs text-muted-foreground/70 mt-2 text-center">
         Press Enter to send, Shift+Enter for new line
       </p>
     </form>
