@@ -6,12 +6,12 @@ export function Layout() {
   const { isCollapsed } = useSidebarStore();
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-950">
       <Sidebar />
       <main 
         className={`
-          min-h-screen transition-all duration-300 ease-in-out
-          ${isCollapsed ? 'ml-20' : 'ml-72'}
+          min-h-screen transition-all duration-300 ease-in-out bg-slate-950
+          ${isCollapsed ? 'pl-20' : 'pl-72'}
         `}
       >
         <Outlet />

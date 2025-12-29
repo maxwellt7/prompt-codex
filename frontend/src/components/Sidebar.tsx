@@ -35,11 +35,10 @@ export function Sidebar() {
   return (
     <aside
       className={`
-        fixed left-0 top-0 h-full z-40
-        bg-gradient-to-b from-slate-900/95 via-slate-900/98 to-slate-950
-        backdrop-blur-xl
-        border-r border-slate-700/50
-        shadow-2xl shadow-black/20
+        fixed left-0 top-0 h-full z-50
+        bg-slate-900
+        border-r border-slate-800
+        shadow-2xl shadow-black/50
         transition-all duration-300 ease-in-out
         flex flex-col
         ${isCollapsed ? 'w-20' : 'w-72'}
