@@ -1,0 +1,152 @@
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE}${url}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(error.error || 'Request failed');
+  }
+
+  return response.json();
+}
+
+// Types
+export interface Category {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  promptCount: number;
+}
+
+export interface PromptSummary {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  tags: string[];
+  source: string;
+}
+
+export interface Prompt extends PromptSummary {
+  systemPromptTemplate: string;
+}
+
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+}
+
+export interface Chat {
+  id: string;
+  promptId: string;
+  promptName: string;
+  category: string;
+  status: 'active' | 'completed';
+  createdAt: string;
+  completedAt?: string;
+  messages?: Message[];
+  messageCount?: number;
+}
+
+export interface ChatStartResponse extends Chat {
+  initialMessage: string;
+}
+
+// API Functions
+export const api = {
+  // Categories
+  getCategories: () => fetchJSON<Category[]>('/categories'),
+
+  // Prompts
+  getPrompts: () => fetchJSON<PromptSummary[]>('/prompts'),
+  getPromptsByCategory: (category: string) => 
+    fetchJSON<PromptSummary[]>(`/prompts/${category}`),
+  getPrompt: (id: string) => fetchJSON<Prompt>(`/prompt/${id}`),
+
+  // Chats
+  getChats: () => fetchJSON<Chat[]>('/chats'),
+  getChat: (id: string) => fetchJSON<Chat>(`/chat/${id}`),
+  
+  startChat: (promptId: string) =>
+    fetchJSON<ChatStartResponse>('/chat/start', {
+      method: 'POST',
+      body: JSON.stringify({ promptId }),
+    }),
+
+  sendMessage: (chatId: string, content: string) =>
+    fetchJSON<{ message: Message }>(`/chat/${chatId}/message`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    }),
+
+  completeChat: (chatId: string) =>
+    fetchJSON<{ id: string; status: string; summary: string; keyTopics: string[] }>(
+      `/chat/${chatId}/complete`,
+      { method: 'POST' }
+    ),
+
+  deleteChat: (chatId: string) =>
+    fetchJSON<{ success: boolean }>(`/chat/${chatId}`, {
+      method: 'DELETE',
+    }),
+
+  // Streaming message
+  sendMessageStream: async (
+    chatId: string,
+    content: string,
+    onChunk: (chunk: string) => void,
+    onComplete: (message: Message) => void
+  ) => {
+    const response = await fetch(`${API_BASE}/chat/${chatId}/message/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to stream message');
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error('No reader available');
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.type === 'chunk') {
+              onChunk(data.content);
+            } else if (data.type === 'done') {
+              onComplete(data.message);
+            }
+          } catch (e) {
+            console.error('Failed to parse SSE data:', e);
+          }
+        }
+      }
+    }
+  },
+};
+
