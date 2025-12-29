@@ -7,9 +7,10 @@ import {
   Users, 
   Layers,
   Compass,
+  Shield,
+  TrendingUp,
   type LucideIcon
 } from 'lucide-react';
-import { cn } from '../lib/utils';
 import type { Category } from '../api/client';
 
 const iconMap: Record<string, LucideIcon> = {
@@ -20,6 +21,9 @@ const iconMap: Record<string, LucideIcon> = {
   transformational: Sparkles,
   agentic: Compass,
   metacognitive: Layers,
+  // Additional mappings
+  growth: TrendingUp,
+  risk: Shield,
 };
 
 type GradientType = 'primary' | 'secondary' | 'accent';
@@ -34,67 +38,59 @@ const categoryGradients: Record<string, GradientType> = {
   metacognitive: 'primary',
 };
 
-const gradientStyles = {
-  primary: "from-[hsl(199,89%,48%)]/20 to-[hsl(199,89%,48%)]/5 hover:from-[hsl(199,89%,48%)]/30 hover:to-[hsl(199,89%,48%)]/10 border-[hsl(199,89%,48%)]/20 hover:border-[hsl(199,89%,48%)]/40",
-  secondary: "from-[hsl(262,83%,58%)]/20 to-[hsl(262,83%,58%)]/5 hover:from-[hsl(262,83%,58%)]/30 hover:to-[hsl(262,83%,58%)]/10 border-[hsl(262,83%,58%)]/20 hover:border-[hsl(262,83%,58%)]/40",
-  accent: "from-[hsl(171,77%,50%)]/20 to-[hsl(171,77%,50%)]/5 hover:from-[hsl(171,77%,50%)]/30 hover:to-[hsl(171,77%,50%)]/10 border-[hsl(171,77%,50%)]/20 hover:border-[hsl(171,77%,50%)]/40",
-};
-
-const iconStyles = {
-  primary: "text-[hsl(199,89%,48%)]",
-  secondary: "text-[hsl(262,83%,58%)]",
-  accent: "text-[hsl(171,77%,50%)]",
+const colors = {
+  primary: { main: '#0ea5e9', light: 'rgba(14, 165, 233, 0.2)', lighter: 'rgba(14, 165, 233, 0.05)' },
+  secondary: { main: '#a855f7', light: 'rgba(168, 85, 247, 0.2)', lighter: 'rgba(168, 85, 247, 0.05)' },
+  accent: { main: '#2dd4bf', light: 'rgba(45, 212, 191, 0.2)', lighter: 'rgba(45, 212, 191, 0.05)' },
 };
 
 interface CategoryCardProps {
   category: Category;
-  index: number;
 }
 
-export function CategoryCard({ category, index }: CategoryCardProps) {
+export function CategoryCard({ category }: CategoryCardProps) {
   const Icon = iconMap[category.id] || Lightbulb;
   const gradient = categoryGradients[category.id] || 'primary';
+  const color = colors[gradient];
   
   return (
     <Link
       to={`/category/${category.id}`}
-      className={cn(
-        "group relative w-full p-6 rounded-2xl border bg-gradient-to-br transition-all duration-300",
-        "hover:scale-[1.02] hover:shadow-lg",
-        "text-left block",
-        gradientStyles[gradient]
-      )}
+      className="group relative block p-6 rounded-2xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg text-left"
       style={{ 
-        animationDelay: `${index * 0.1}s`,
+        background: `linear-gradient(135deg, ${color.light} 0%, ${color.lighter} 100%)`,
+        borderColor: color.light,
       }}
     >
       <div className="flex items-start justify-between mb-4">
         <div
-          className={cn(
-            "p-3 rounded-xl bg-background/50 backdrop-blur-sm",
-            "group-hover:scale-110 transition-transform duration-300"
-          )}
+          className="p-3 rounded-xl transition-transform duration-300 group-hover:scale-110"
+          style={{ backgroundColor: 'rgba(10, 15, 30, 0.5)' }}
         >
-          <Icon className={cn("w-6 h-6", iconStyles[gradient])} />
+          <Icon className="w-6 h-6" style={{ color: color.main }} />
         </div>
-        <span className="text-xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+        <span 
+          className="text-xs font-mono px-2 py-1 rounded-full"
+          style={{ 
+            backgroundColor: 'rgba(100, 116, 139, 0.3)',
+            color: 'rgb(148, 163, 184)'
+          }}
+        >
           {category.promptCount} prompts
         </span>
       </div>
 
-      <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-gradient transition-colors">
+      <h3 className="text-lg font-semibold mb-2" style={{ color: 'rgb(241, 245, 249)' }}>
         {category.name}
       </h3>
-      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+      <p className="text-sm leading-relaxed" style={{ color: 'rgb(148, 163, 184)' }}>
         {category.description}
       </p>
 
-      <div className={cn(
-        "absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity",
-        gradient === 'primary' && "bg-[hsl(199,89%,48%)]",
-        gradient === 'secondary' && "bg-[hsl(262,83%,58%)]",
-        gradient === 'accent' && "bg-[hsl(171,77%,50%)]",
-      )} />
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ backgroundColor: color.main }}
+      />
     </Link>
   );
 }

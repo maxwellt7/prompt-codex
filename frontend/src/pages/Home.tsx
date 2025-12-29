@@ -144,8 +144,8 @@ export function Home() {
           {/* Categories Grid */}
           {categories && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {categories.map((category, index) => (
-                <CategoryCard key={category.id} category={category} index={index} />
+              {categories.map((category) => (
+                <CategoryCard key={category.id} category={category} />
               ))}
             </div>
           )}
