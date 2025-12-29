@@ -1,10 +1,11 @@
-import { ArrowRight, Sparkles, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowRight, Sparkles, Zap, Send, MessageSquare, Clock, Archive } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { CategoryCard } from '../components/CategoryCard';
 import { useCategories } from '../hooks/usePrompts';
 
 export function Home() {
   const { data: categories, isLoading, error } = useCategories();
+  const navigate = useNavigate();
 
   const totalPrompts = categories?.reduce((acc, c) => acc + c.promptCount, 0) || 0;
 
@@ -31,13 +32,15 @@ export function Home() {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <Link 
-                to="/"
+              <button 
                 className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 History
-              </Link>
-              <button className="px-4 py-2 text-sm rounded-lg bg-muted/50 backdrop-blur-md border border-border/50 hover:bg-muted/70 hover:border-primary/30 text-foreground transition-all flex items-center gap-2">
+              </button>
+              <button 
+                onClick={() => navigate('/')}
+                className="px-4 py-2 text-sm rounded-lg bg-muted/50 backdrop-blur-md border border-border/50 hover:bg-muted/70 hover:border-primary/30 text-foreground transition-all flex items-center gap-2"
+              >
                 <Zap className="w-4 h-4" />
                 New Chat
               </button>
@@ -118,7 +121,7 @@ export function Home() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 rounded-xl bg-muted/50" />
-                    <div className="w-16 h-6 rounded-full bg-muted/50" />
+                    <div className="w-20 h-6 rounded-full bg-muted/50" />
                   </div>
                   <div className="h-5 w-32 bg-muted/50 rounded mb-2" />
                   <div className="h-4 w-full bg-muted/50 rounded" />
@@ -146,6 +149,129 @@ export function Home() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Preview Section */}
+      <section className="relative z-10 py-20 border-t border-border/30">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Seamless Conversations
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Your chats are tracked in the sidebar and archived to Pinecone for future reference.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center gap-8 max-w-5xl mx-auto">
+            {/* Sidebar Preview */}
+            <div className="hidden lg:block w-64 bg-card/50 backdrop-blur-md border border-border/50 rounded-2xl p-4 space-y-6">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(199,89%,48%)] to-[hsl(262,83%,58%)] flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">P</span>
+                </div>
+                <span className="font-semibold text-foreground">Prompt Codex</span>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                  <MessageSquare className="w-3 h-3" />
+                  <span className="uppercase tracking-wider">Active Chats</span>
+                </div>
+                <div className="space-y-1">
+                  {[
+                    { title: "Market Analysis Q4", time: "2m ago", active: true },
+                    { title: "Brand Strategy Review", time: "1h ago", active: false },
+                    { title: "Competitor Deep Dive", time: "3h ago", active: false },
+                  ].map((chat, i) => (
+                    <div
+                      key={i}
+                      className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-all ${
+                        chat.active ? "bg-primary/10 border border-primary/30" : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${chat.active ? "bg-accent" : "bg-muted-foreground/30"}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{chat.title}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {chat.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                  <Archive className="w-3 h-3" />
+                  <span className="uppercase tracking-wider">Archived</span>
+                </div>
+                <p className="text-xs text-muted-foreground/70 italic">
+                  Completed chats stored in Pinecone
+                </p>
+              </div>
+            </div>
+
+            {/* Chat Preview */}
+            <div className="relative w-full max-w-md">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 blur-3xl opacity-50" />
+              
+              <div className="relative border-gradient rounded-2xl overflow-hidden bg-card/80 backdrop-blur-md">
+                <div className="flex items-center gap-3 p-4 border-b border-border/50">
+                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                  <span className="text-sm font-medium text-foreground">Strategic Analysis</span>
+                  <span className="ml-auto text-xs text-muted-foreground font-mono">claude-3-opus</span>
+                </div>
+                
+                <div className="p-4 space-y-4 min-h-[200px]">
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(199,89%,48%)] to-[hsl(262,83%,58%)] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                      AI
+                    </div>
+                    <div className="bg-muted/50 rounded-2xl rounded-tl-md p-3 text-sm text-foreground/90 max-w-[85%]">
+                      <p>I've analyzed your market position. Let me walk you through the key strategic opportunities...</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 justify-end">
+                    <div className="bg-primary/20 border border-primary/30 rounded-2xl rounded-tr-md p-3 text-sm text-foreground/90 max-w-[85%]">
+                      <p>Focus on the competitive advantages</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(199,89%,48%)] to-[hsl(262,83%,58%)] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                      AI
+                    </div>
+                    <div className="bg-muted/50 rounded-2xl rounded-tl-md p-3">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 border-t border-border/50">
+                  <div className="flex items-center gap-2 bg-muted/30 rounded-xl p-2">
+                    <input
+                      type="text"
+                      placeholder="Continue the conversation..."
+                      className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none px-2"
+                      readOnly
+                    />
+                    <button className="p-2 rounded-lg bg-muted/50 border border-border/50 text-muted-foreground shrink-0">
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

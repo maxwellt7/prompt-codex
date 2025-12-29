@@ -19,8 +19,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
+          {/* Home page without sidebar */}
+          <Route path="/" element={<Home />} />
+          
+          {/* Pages with sidebar */}
+          <Route element={<Layout />}>
             <Route path="category/:categoryId" element={<Category />} />
             <Route path="chat/:chatId" element={<Chat />} />
           </Route>
