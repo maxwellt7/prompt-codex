@@ -36,7 +36,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Type your message..
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <div className="glass rounded-2xl p-1">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-1.5 focus-within:border-slate-700 transition-colors">
         <div className="flex items-end gap-2">
           <textarea
             ref={textareaRef}
@@ -47,7 +47,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Type your message..
             disabled={disabled}
             rows={1}
             className="
-              flex-1 bg-transparent text-midnight-100 placeholder-midnight-500
+              flex-1 bg-transparent text-slate-100 placeholder-slate-500
               px-4 py-3 resize-none
               focus:outline-none
               disabled:opacity-50 disabled:cursor-not-allowed
@@ -58,9 +58,10 @@ export function ChatInput({ onSend, disabled, placeholder = 'Type your message..
             type="submit"
             disabled={!message.trim() || disabled}
             className="
-              p-3 rounded-xl bg-accent-teal/20 text-accent-teal
-              hover:bg-accent-teal/30 hover:scale-105
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+              p-3 rounded-xl 
+              bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
+              hover:bg-emerald-500/30 hover:text-emerald-300
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-500/20
               transition-all duration-200
               flex items-center justify-center
             "
@@ -74,10 +75,9 @@ export function ChatInput({ onSend, disabled, placeholder = 'Type your message..
         </div>
       </div>
       
-      <p className="text-xs text-midnight-500 mt-2 text-center">
+      <p className="text-xs text-slate-600 mt-2 text-center">
         Press Enter to send, Shift+Enter for new line
       </p>
     </form>
   );
 }
-
