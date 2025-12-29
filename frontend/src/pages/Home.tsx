@@ -6,11 +6,11 @@ export function Home() {
   const { data: categories, isLoading, error } = useCategories();
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#0a0e14]">
       {/* Hero Section */}
       <header className="relative overflow-hidden">
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0e14] via-[#0f1419] to-[#0a0e14]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-transparent to-transparent" />
         
         {/* Content */}
@@ -71,7 +71,7 @@ export function Home() {
       </header>
 
       {/* Categories Section */}
-      <section className="relative bg-slate-950 px-6 py-16 md:px-12">
+      <section className="relative bg-[#0a0e14] px-6 py-16 md:px-12">
         <div className="max-w-6xl mx-auto">
           {/* Section Header */}
           <div className="flex items-center justify-between mb-10">
@@ -135,7 +135,7 @@ export function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-950 border-t border-slate-800/50 px-6 py-8">
+      <footer className="bg-[#0a0e14] border-t border-[#1a2332] px-6 py-8">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-slate-600 text-sm">
             Built with Claude • Powered by your Prompt Codex collection
