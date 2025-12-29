@@ -13,14 +13,17 @@ export async function createChatCompletion(
   systemPrompt: string,
   messages: Message[]
 ): Promise<string> {
+  // Anthropic requires at least one user message
+  // If no messages provided, use a greeting prompt
+  const apiMessages = messages.length > 0 
+    ? messages.map(m => ({ role: m.role, content: m.content }))
+    : [{ role: 'user' as const, content: 'Hello! Please introduce yourself and explain how you can help me based on your expertise.' }];
+
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
     system: systemPrompt,
-    messages: messages.map(m => ({
-      role: m.role,
-      content: m.content,
-    })),
+    messages: apiMessages,
   });
 
   // Extract text from response
