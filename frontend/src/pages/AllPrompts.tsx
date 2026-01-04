@@ -11,7 +11,7 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import { PromptCard } from '../components/PromptCard';
-import { SafeAuthButton } from '../components/AuthButton';
+import { AuthButton } from '../components/AuthButton';
 import { useAllPrompts, useFilterOptions, useCategories } from '../hooks/usePrompts';
 import { useStartChat } from '../hooks/useChat';
 import type { PromptSearchParams } from '../api/client';
@@ -99,7 +99,7 @@ export function AllPrompts() {
               <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
               <span>Back to Home</span>
             </Link>
-            <SafeAuthButton />
+            <AuthButton />
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

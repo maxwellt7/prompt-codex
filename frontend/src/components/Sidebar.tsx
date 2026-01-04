@@ -13,7 +13,7 @@ import {
 import { useChatStore } from '../store/chatStore';
 import { useSidebarStore } from '../store/sidebarStore';
 import { useChats, useDeleteChat } from '../hooks/useChat';
-import { SafeAuthButton } from './AuthButton';
+import { AuthButton } from './AuthButton';
 import { cn } from '../lib/utils';
 
 export function Sidebar() {
@@ -165,7 +165,7 @@ export function Sidebar() {
             "flex items-center",
             isCollapsed ? "justify-center" : "justify-start px-2"
           )}>
-            <SafeAuthButton />
+            <AuthButton />
           </div>
         </div>
       </aside>

@@ -13,7 +13,7 @@ import { Button } from "../components/ui/button";
 import { CategoryCard } from "../components/CategoryCard";
 import { ChatPreview } from "../components/ChatPreview";
 import { SidebarPreview } from "../components/SidebarPreview";
-import { SafeAuthButton } from "../components/AuthButton";
+import { AuthButton } from "../components/AuthButton";
 import { useCategories } from "../hooks/usePrompts";
 
 // Icon mapping for categories from API
@@ -84,7 +84,7 @@ export function Home() {
                 <Zap className="w-4 h-4 mr-1" />
                 New Chat
               </Button>
-              <SafeAuthButton />
+              <AuthButton />
             </div>
           </nav>
 
