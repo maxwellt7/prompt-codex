@@ -5,6 +5,8 @@ import { Home } from './pages/Home';
 import { Category } from './pages/Category';
 import { Chat } from './pages/Chat';
 import { AllPrompts } from './pages/AllPrompts';
+import { SignIn } from './pages/SignIn';
+import { SignUp } from './pages/SignUp';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,11 +22,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          {/* Home page without sidebar */}
+          {/* Public pages */}
           <Route path="/" element={<Home />} />
-          
-          {/* All prompts page */}
           <Route path="/prompts" element={<AllPrompts />} />
+          
+          {/* Auth pages */}
+          <Route path="/sign-in/*" element={<SignIn />} />
+          <Route path="/sign-up/*" element={<SignUp />} />
           
           {/* Pages with sidebar */}
           <Route element={<Layout />}>

@@ -11,6 +11,7 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import { PromptCard } from '../components/PromptCard';
+import { SafeAuthButton } from '../components/AuthButton';
 import { useAllPrompts, useFilterOptions, useCategories } from '../hooks/usePrompts';
 import { useStartChat } from '../hooks/useChat';
 import type { PromptSearchParams } from '../api/client';
@@ -90,13 +91,16 @@ export function AllPrompts() {
       {/* Header */}
       <header className="border-b border-border/30 sticky top-0 bg-background/95 backdrop-blur-sm z-20">
         <div className="container mx-auto px-6 py-6">
-          <Link 
-            to="/" 
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 group"
-          >
-            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span>Back to Home</span>
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link 
+              to="/" 
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+            >
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              <span>Back to Home</span>
+            </Link>
+            <SafeAuthButton />
+          </div>
 
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-start gap-4">
