@@ -8,8 +8,10 @@ import {
   Loader2,
   Sparkles,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  LogIn
 } from 'lucide-react';
+import { useAuth, SignInButton } from '@clerk/clerk-react';
 import { PromptCard } from '../components/PromptCard';
 import { AuthButton } from '../components/AuthButton';
 import { useAllPrompts, useFilterOptions, useCategories } from '../hooks/usePrompts';
@@ -20,6 +22,7 @@ export function AllPrompts() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const startChat = useStartChat();
+  const { isSignedIn } = useAuth();
   
   // Local state for immediate UI updates
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
@@ -71,6 +74,7 @@ export function AllPrompts() {
   }, [searchInput]);
   
   const handleSelectPrompt = async (promptId: string) => {
+    if (!isSignedIn) return;
     try {
       const result = await startChat.mutateAsync(promptId);
       navigate(`/chat/${result.id}`);
@@ -271,6 +275,21 @@ export function AllPrompts() {
 
       {/* Results */}
       <main className="container mx-auto px-6 py-8">
+        {/* Sign-in prompt if not authenticated */}
+        {!isSignedIn && (
+          <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20 mb-6">
+            <div className="flex items-center gap-3">
+              <LogIn size={20} className="text-primary" />
+              <span className="text-foreground">Sign in to start conversations with these prompts</span>
+            </div>
+            <SignInButton mode="modal">
+              <button className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+                Sign In
+              </button>
+            </SignInButton>
+          </div>
+        )}
+
         {/* Loading indicator */}
         {isFetching && (
           <div className="flex items-center justify-center gap-2 py-2 mb-4 text-sm text-muted-foreground">
@@ -307,8 +326,9 @@ export function AllPrompts() {
                 <PromptCard
                   key={prompt.id}
                   prompt={prompt}
-                  onClick={() => handleSelectPrompt(prompt.id)}
+                  onClick={isSignedIn ? () => handleSelectPrompt(prompt.id) : undefined}
                   index={index}
+                  disabled={!isSignedIn}
                 />
               ))}
             </div>

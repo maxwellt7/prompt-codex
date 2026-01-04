@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Search, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Search, Loader2, Sparkles, LogIn } from 'lucide-react';
+import { useAuth, SignInButton } from '@clerk/clerk-react';
 import { PromptCard } from '../components/PromptCard';
 import { useCategories, usePrompts } from '../hooks/usePrompts';
 import { useStartChat } from '../hooks/useChat';
@@ -9,6 +10,7 @@ export function Category() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const { isSignedIn } = useAuth();
   
   const { data: categories } = useCategories();
   const { data: prompts, isLoading } = usePrompts(categoryId);
@@ -23,6 +25,10 @@ export function Category() {
   );
 
   const handleSelectPrompt = async (promptId: string) => {
+    if (!isSignedIn) {
+      // This shouldn't happen with the UI protection, but just in case
+      return;
+    }
     try {
       const result = await startChat.mutateAsync(promptId);
       navigate(`/chat/${result.id}`);
@@ -65,6 +71,23 @@ export function Category() {
           )}
         </div>
       </header>
+
+      {/* Sign-in prompt if not authenticated */}
+      {!isSignedIn && (
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20">
+            <div className="flex items-center gap-3">
+              <LogIn size={20} className="text-primary" />
+              <span className="text-foreground">Sign in to start conversations with these prompts</span>
+            </div>
+            <SignInButton mode="modal">
+              <button className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+                Sign In
+              </button>
+            </SignInButton>
+          </div>
+        </div>
+      )}
 
       {/* Search */}
       <div className="container mx-auto px-6 py-8">
@@ -116,8 +139,9 @@ export function Category() {
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
-                onClick={() => handleSelectPrompt(prompt.id)}
+                onClick={isSignedIn ? () => handleSelectPrompt(prompt.id) : undefined}
                 index={index}
+                disabled={!isSignedIn}
               />
             ))}
           </div>

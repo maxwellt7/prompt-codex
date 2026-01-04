@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { clerkMiddleware } from '@clerk/express';
 import { promptRoutes } from './routes/prompts.js';
 import { chatRoutes } from './routes/chat.js';
 
@@ -20,6 +21,8 @@ app.use(cors({
       'http://localhost:5173',
       'http://localhost:5174',
       'http://localhost:5175',
+      'http://localhost:5176',
+      'http://localhost:5177',
       'https://prompt-codex.vercel.app',
       'https://prompt-codex-git-main-max-maxwellmayes-projects.vercel.app',
     ];
@@ -42,6 +45,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Clerk authentication middleware
+app.use(clerkMiddleware());
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -57,4 +63,3 @@ app.listen(PORT, () => {
 });
 
 export default app;
-

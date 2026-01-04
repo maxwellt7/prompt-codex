@@ -9,6 +9,7 @@ datasource db {
 
 model Chat {
   id           String    @id @default(uuid())
+  userId       String    @map("user_id")
   promptId     String    @map("prompt_id")
   promptName   String    @map("prompt_name")
   category     String
@@ -18,6 +19,7 @@ model Chat {
   completedAt  DateTime? @map("completed_at")
   messages     Message[]
 
+  @@index([userId])
   @@map("chats")
 }
 

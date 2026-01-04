@@ -1,12 +1,29 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
+// Auth token getter - will be set by the app
+let getAuthToken: (() => Promise<string | null>) | null = null;
+
+export function setAuthTokenGetter(getter: () => Promise<string | null>) {
+  getAuthToken = getter;
+}
+
 async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...options?.headers as Record<string, string>,
+  };
+
+  // Add auth token if available
+  if (getAuthToken) {
+    const token = await getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+
   const response = await fetch(`${API_BASE}${url}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -15,6 +32,26 @@ async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
   }
 
   return response.json();
+}
+
+async function fetchWithAuth(url: string, options?: RequestInit): Promise<Response> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...options?.headers as Record<string, string>,
+  };
+
+  // Add auth token if available
+  if (getAuthToken) {
+    const token = await getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+
+  return fetch(`${API_BASE}${url}`, {
+    ...options,
+    headers,
+  });
 }
 
 // Types
@@ -95,15 +132,15 @@ export interface PromptSearchParams {
 
 // API Functions
 export const api = {
-  // Categories
+  // Categories (public)
   getCategories: () => fetchJSON<Category[]>('/categories'),
 
-  // Prompts
+  // Prompts (public)
   getPromptsByCategory: (category: string) => 
     fetchJSON<PromptSummary[]>(`/prompts/${category}`),
   getPrompt: (id: string) => fetchJSON<Prompt>(`/prompt/${id}`),
   
-  // All prompts with search/filter/pagination
+  // All prompts with search/filter/pagination (public)
   getAllPrompts: (params?: PromptSearchParams) => {
     const searchParams = new URLSearchParams();
     if (params?.search) searchParams.set('search', params.search);
@@ -120,10 +157,10 @@ export const api = {
     );
   },
   
-  // Get filter options
+  // Get filter options (public)
   getFilterOptions: () => fetchJSON<FilterOptionsResponse>('/filters'),
 
-  // Chats
+  // Chats (require auth)
   getChats: () => fetchJSON<Chat[]>('/chats'),
   getChat: (id: string) => fetchJSON<Chat>(`/chat/${id}`),
   
@@ -150,16 +187,15 @@ export const api = {
       method: 'DELETE',
     }),
 
-  // Streaming message
+  // Streaming message (requires auth)
   sendMessageStream: async (
     chatId: string,
     content: string,
     onChunk: (chunk: string) => void,
     onComplete: (message: Message) => void
   ) => {
-    const response = await fetch(`${API_BASE}/chat/${chatId}/message/stream`, {
+    const response = await fetchWithAuth(`/chat/${chatId}/message/stream`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content }),
     });
 
@@ -198,4 +234,3 @@ export const api = {
     }
   },
 };
-

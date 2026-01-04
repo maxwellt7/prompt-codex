@@ -30,6 +30,7 @@ export interface ChatMetadata {
   date: string;
   messageCount: number;
   conversationText: string;
+  userId?: string;
 }
 
 // Create namespace from prompt name (sanitize for Pinecone)
@@ -66,6 +67,7 @@ export async function storeChatEmbedding(
         keyTopics: metadata.keyTopics,
         date: metadata.date,
         messageCount: metadata.messageCount,
+        userId: metadata.userId || '',
         // Store first 1000 chars of conversation for retrieval
         conversationPreview: metadata.conversationText.slice(0, 1000),
       },

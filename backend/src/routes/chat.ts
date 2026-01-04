@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { getAuth, requireAuth } from '@clerk/express';
 import { prisma } from '../db/client.js';
 import { getPromptById } from '../prompts/promptData.js';
 import { createChatCompletion, createStreamingChatCompletion, generateConversationSummary, Message } from '../services/anthropic.js';
@@ -7,9 +8,21 @@ import { storeChatEmbedding, ChatMetadata } from '../services/pinecone.js';
 
 const router = Router();
 
-// Start a new chat
-router.post('/chat/start', async (req: Request, res: Response) => {
+// Helper to get userId from request
+function getUserId(req: Request): string | null {
+  const auth = getAuth(req);
+  return auth.userId;
+}
+
+// Start a new chat (requires auth)
+router.post('/chat/start', requireAuth(), async (req: Request, res: Response) => {
   try {
+    const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { promptId } = req.body;
 
     if (!promptId) {
@@ -23,9 +36,10 @@ router.post('/chat/start', async (req: Request, res: Response) => {
       return;
     }
 
-    // Create the chat in the database
+    // Create the chat in the database with userId
     const chat = await prisma.chat.create({
       data: {
+        userId,
         promptId: prompt.id,
         promptName: prompt.name,
         category: prompt.category,
@@ -64,9 +78,15 @@ router.post('/chat/start', async (req: Request, res: Response) => {
   }
 });
 
-// Send a message to an existing chat
-router.post('/chat/:id/message', async (req: Request, res: Response) => {
+// Send a message to an existing chat (requires auth)
+router.post('/chat/:id/message', requireAuth(), async (req: Request, res: Response) => {
   try {
+    const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { id } = req.params;
     const { content } = req.body;
 
@@ -75,9 +95,9 @@ router.post('/chat/:id/message', async (req: Request, res: Response) => {
       return;
     }
 
-    // Get the chat
-    const chat = await prisma.chat.findUnique({
-      where: { id },
+    // Get the chat (ensure it belongs to the user)
+    const chat = await prisma.chat.findFirst({
+      where: { id, userId },
       include: { messages: { orderBy: { createdAt: 'asc' } } },
     });
 
@@ -135,9 +155,15 @@ router.post('/chat/:id/message', async (req: Request, res: Response) => {
   }
 });
 
-// Stream a message response
-router.post('/chat/:id/message/stream', async (req: Request, res: Response) => {
+// Stream a message response (requires auth)
+router.post('/chat/:id/message/stream', requireAuth(), async (req: Request, res: Response) => {
   try {
+    const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { id } = req.params;
     const { content } = req.body;
 
@@ -146,9 +172,9 @@ router.post('/chat/:id/message/stream', async (req: Request, res: Response) => {
       return;
     }
 
-    // Get the chat
-    const chat = await prisma.chat.findUnique({
-      where: { id },
+    // Get the chat (ensure it belongs to the user)
+    const chat = await prisma.chat.findFirst({
+      where: { id, userId },
       include: { messages: { orderBy: { createdAt: 'asc' } } },
     });
 
@@ -219,14 +245,20 @@ router.post('/chat/:id/message/stream', async (req: Request, res: Response) => {
   }
 });
 
-// Complete a chat and store to Pinecone
-router.post('/chat/:id/complete', async (req: Request, res: Response) => {
+// Complete a chat and store to Pinecone (requires auth)
+router.post('/chat/:id/complete', requireAuth(), async (req: Request, res: Response) => {
   try {
+    const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { id } = req.params;
 
-    // Get the chat with messages
-    const chat = await prisma.chat.findUnique({
-      where: { id },
+    // Get the chat with messages (ensure it belongs to the user)
+    const chat = await prisma.chat.findFirst({
+      where: { id, userId },
       include: { messages: { orderBy: { createdAt: 'asc' } } },
     });
 
@@ -269,6 +301,7 @@ router.post('/chat/:id/complete', async (req: Request, res: Response) => {
       date: new Date().toISOString().split('T')[0],
       messageCount: chat.messages.length,
       conversationText,
+      userId, // Include userId in metadata
     };
 
     await storeChatEmbedding(embedding, metadata);
@@ -295,10 +328,17 @@ router.post('/chat/:id/complete', async (req: Request, res: Response) => {
   }
 });
 
-// Get all chats (for sidebar)
-router.get('/chats', async (req: Request, res: Response) => {
+// Get all chats for current user (requires auth)
+router.get('/chats', requireAuth(), async (req: Request, res: Response) => {
   try {
+    const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const chats = await prisma.chat.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -325,13 +365,19 @@ router.get('/chats', async (req: Request, res: Response) => {
   }
 });
 
-// Get a single chat with messages
-router.get('/chat/:id', async (req: Request, res: Response) => {
+// Get a single chat with messages (requires auth)
+router.get('/chat/:id', requireAuth(), async (req: Request, res: Response) => {
   try {
+    const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { id } = req.params;
 
-    const chat = await prisma.chat.findUnique({
-      where: { id },
+    const chat = await prisma.chat.findFirst({
+      where: { id, userId },
       include: {
         messages: {
           orderBy: { createdAt: 'asc' },
@@ -351,10 +397,26 @@ router.get('/chat/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Delete a chat
-router.delete('/chat/:id', async (req: Request, res: Response) => {
+// Delete a chat (requires auth)
+router.delete('/chat/:id', requireAuth(), async (req: Request, res: Response) => {
   try {
+    const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { id } = req.params;
+
+    // Ensure the chat belongs to the user before deleting
+    const chat = await prisma.chat.findFirst({
+      where: { id, userId },
+    });
+
+    if (!chat) {
+      res.status(404).json({ error: 'Chat not found' });
+      return;
+    }
 
     await prisma.chat.delete({
       where: { id },
@@ -368,4 +430,3 @@ router.delete('/chat/:id', async (req: Request, res: Response) => {
 });
 
 export { router as chatRoutes };
-

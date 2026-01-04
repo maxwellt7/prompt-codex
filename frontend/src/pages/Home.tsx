@@ -7,7 +7,7 @@ import {
   Shield,
   ArrowRight,
   Sparkles,
-  Zap
+  AlertCircle
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { CategoryCard } from "../components/CategoryCard";
@@ -79,10 +79,8 @@ export function Home() {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm">History</Button>
-              <Button variant="glass" size="sm">
-                <Zap className="w-4 h-4 mr-1" />
-                New Chat
+              <Button variant="ghost" size="sm" asChild>
+                <a href="#categories">Browse Prompts</a>
               </Button>
               <AuthButton />
             </div>
@@ -201,7 +199,7 @@ export function Home() {
           {/* Error State */}
           {error && (
             <div className="border-gradient rounded-2xl p-10 text-center max-w-md mx-auto">
-              <Zap className="w-10 h-10 mx-auto mb-4" style={{ color: "#ef4444" }} />
+              <AlertCircle className="w-10 h-10 mx-auto mb-4" style={{ color: "#ef4444" }} />
               <p className="font-medium mb-2" style={{ color: "#e8edf5" }}>Failed to load categories</p>
               <p className="text-sm" style={{ color: "#94a3b8" }}>
                 Make sure the backend server is running and connected
