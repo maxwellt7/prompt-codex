@@ -3,7 +3,6 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { 
   Search, 
   ArrowLeft, 
-  Filter, 
   ChevronLeft, 
   ChevronRight,
   Loader2,
@@ -14,7 +13,7 @@ import {
 import { PromptCard } from '../components/PromptCard';
 import { useAllPrompts, useFilterOptions, useCategories } from '../hooks/usePrompts';
 import { useStartChat } from '../hooks/useChat';
-import { PromptSearchParams } from '../api/client';
+import type { PromptSearchParams } from '../api/client';
 
 export function AllPrompts() {
   const navigate = useNavigate();

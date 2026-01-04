@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { api, PromptSearchParams } from '../api/client';
+import { api } from '../api/client';
+import type { PromptSearchParams } from '../api/client';
 
 export function useCategories() {
   return useQuery({
