@@ -1,8 +1,21 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// Initialize Anthropic lazily only if API key is available
+let anthropicClient: Anthropic | null = null;
+
+function getAnthropic(): Anthropic {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY not configured - chat functionality disabled');
+  }
+  
+  if (!anthropicClient) {
+    anthropicClient = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+  }
+  
+  return anthropicClient;
+}
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -13,6 +26,8 @@ export async function createChatCompletion(
   systemPrompt: string,
   messages: Message[]
 ): Promise<string> {
+  const anthropic = getAnthropic();
+  
   // Anthropic requires at least one user message
   // If no messages provided, use a greeting prompt
   const apiMessages = messages.length > 0 
@@ -40,6 +55,8 @@ export async function createStreamingChatCompletion(
   messages: Message[],
   onChunk: (chunk: string) => void
 ): Promise<string> {
+  const anthropic = getAnthropic();
+  
   const stream = await anthropic.messages.stream({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
@@ -68,6 +85,8 @@ export async function generateConversationSummary(messages: Message[]): Promise<
   summary: string;
   keyTopics: string[];
 }> {
+  const anthropic = getAnthropic();
+  
   const conversationText = messages
     .map(m => `${m.role}: ${m.content}`)
     .join('\n\n');
@@ -103,4 +122,3 @@ ${conversationText}`,
     return { summary: 'Conversation completed', keyTopics: [] };
   }
 }
-

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../api/client';
+import { api, PromptSearchParams } from '../api/client';
 
 export function useCategories() {
   return useQuery({
@@ -12,7 +12,7 @@ export function useCategories() {
 export function usePrompts(category?: string) {
   return useQuery({
     queryKey: ['prompts', category],
-    queryFn: () => (category ? api.getPromptsByCategory(category) : api.getPrompts()),
+    queryFn: () => (category ? api.getPromptsByCategory(category) : api.getAllPrompts().then(r => r.prompts)),
     staleTime: 5 * 60 * 1000,
   });
 }
@@ -26,3 +26,19 @@ export function usePrompt(id: string | null) {
   });
 }
 
+export function useAllPrompts(params: PromptSearchParams) {
+  return useQuery({
+    queryKey: ['allPrompts', params],
+    queryFn: () => api.getAllPrompts(params),
+    staleTime: 2 * 60 * 1000, // 2 minutes for search results
+    placeholderData: (previousData) => previousData, // Keep previous data while loading
+  });
+}
+
+export function useFilterOptions() {
+  return useQuery({
+    queryKey: ['filterOptions'],
+    queryFn: api.getFilterOptions,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}

@@ -125,8 +125,10 @@ export function Home() {
                   <ArrowRight className="w-5 h-5" />
                 </a>
               </Button>
-              <Button variant="outline" size="lg">
-                View All Prompts
+              <Button variant="outline" size="lg" asChild>
+                <a href="/prompts">
+                  View All Prompts
+                </a>
               </Button>
             </div>
           </div>

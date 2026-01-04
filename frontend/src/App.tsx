@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Category } from './pages/Category';
 import { Chat } from './pages/Chat';
+import { AllPrompts } from './pages/AllPrompts';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,6 +22,9 @@ function App() {
         <Routes>
           {/* Home page without sidebar */}
           <Route path="/" element={<Home />} />
+          
+          {/* All prompts page */}
+          <Route path="/prompts" element={<AllPrompts />} />
           
           {/* Pages with sidebar */}
           <Route element={<Layout />}>

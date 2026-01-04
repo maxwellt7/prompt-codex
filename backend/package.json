@@ -11,7 +11,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "parse-pdfs": "tsx src/parser/extractPrompts.ts"
+    "parse-pdfs": "tsx src/parser/extractPrompts.ts",
+    "extract-all": "tsx src/parser/extractAllPrompts.ts"
   },
   "keywords": [],
   "author": "",

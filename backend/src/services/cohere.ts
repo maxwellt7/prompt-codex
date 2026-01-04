@@ -1,10 +1,25 @@
 import { CohereClient } from 'cohere-ai';
 
-const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY,
-});
+// Initialize Cohere lazily only if API key is available
+let cohereClient: CohereClient | null = null;
+
+function getCohere(): CohereClient {
+  if (!process.env.COHERE_API_KEY) {
+    throw new Error('COHERE_API_KEY not configured - embedding functionality disabled');
+  }
+  
+  if (!cohereClient) {
+    cohereClient = new CohereClient({
+      token: process.env.COHERE_API_KEY,
+    });
+  }
+  
+  return cohereClient;
+}
 
 export async function generateEmbedding(text: string): Promise<number[]> {
+  const cohere = getCohere();
+  
   const response = await cohere.embed({
     texts: [text],
     model: 'embed-english-v3.0',
@@ -27,6 +42,8 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
+  const cohere = getCohere();
+  
   const response = await cohere.embed({
     texts,
     model: 'embed-english-v3.0',
@@ -39,4 +56,3 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
 
   return response.embeddings as number[][];
 }
-

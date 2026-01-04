@@ -1,8 +1,22 @@
 import { Pinecone } from '@pinecone-database/pinecone';
 
-const pinecone = new Pinecone({
-  apiKey: process.env.PINECONE_API_KEY!,
-});
+// Initialize Pinecone lazily only if API key is available
+let pineconeClient: Pinecone | null = null;
+
+function getPinecone(): Pinecone | null {
+  if (!process.env.PINECONE_API_KEY) {
+    console.warn('Pinecone API key not configured - chat archival disabled');
+    return null;
+  }
+  
+  if (!pineconeClient) {
+    pineconeClient = new Pinecone({
+      apiKey: process.env.PINECONE_API_KEY,
+    });
+  }
+  
+  return pineconeClient;
+}
 
 const indexName = process.env.PINECONE_INDEX || 'chat-embeddings-1024';
 
@@ -31,6 +45,12 @@ export async function storeChatEmbedding(
   embedding: number[],
   metadata: ChatMetadata
 ): Promise<void> {
+  const pinecone = getPinecone();
+  if (!pinecone) {
+    console.log('Skipping chat storage - Pinecone not configured');
+    return;
+  }
+  
   const index = pinecone.index(indexName);
   const namespace = sanitizeNamespace(metadata.promptName);
 
@@ -64,6 +84,11 @@ export async function searchSimilarChats(
   score: number;
   metadata: Record<string, unknown>;
 }>> {
+  const pinecone = getPinecone();
+  if (!pinecone) {
+    return [];
+  }
+  
   const index = pinecone.index(indexName);
   
   const queryOptions: {
@@ -92,9 +117,13 @@ export async function searchSimilarChats(
 }
 
 export async function listNamespaces(): Promise<string[]> {
+  const pinecone = getPinecone();
+  if (!pinecone) {
+    return [];
+  }
+  
   const index = pinecone.index(indexName);
   const stats = await index.describeIndexStats();
   
   return Object.keys(stats.namespaces || {});
 }
-

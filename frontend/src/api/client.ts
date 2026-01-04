@@ -63,16 +63,65 @@ export interface ChatStartResponse extends Chat {
   initialMessage: string;
 }
 
+// Pagination response
+export interface PaginatedResponse<T> {
+  prompts: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+}
+
+// Filter options response
+export interface FilterOptionsResponse {
+  sources: string[];
+  tags: string[];
+  categories: { id: string; name: string }[];
+}
+
+// Search/filter params
+export interface PromptSearchParams {
+  search?: string;
+  category?: string;
+  source?: string;
+  tags?: string;
+  page?: number;
+  limit?: number;
+  sort?: 'name' | 'category' | 'source';
+}
+
 // API Functions
 export const api = {
   // Categories
   getCategories: () => fetchJSON<Category[]>('/categories'),
 
   // Prompts
-  getPrompts: () => fetchJSON<PromptSummary[]>('/prompts'),
   getPromptsByCategory: (category: string) => 
     fetchJSON<PromptSummary[]>(`/prompts/${category}`),
   getPrompt: (id: string) => fetchJSON<Prompt>(`/prompt/${id}`),
+  
+  // All prompts with search/filter/pagination
+  getAllPrompts: (params?: PromptSearchParams) => {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.category) searchParams.set('category', params.category);
+    if (params?.source) searchParams.set('source', params.source);
+    if (params?.tags) searchParams.set('tags', params.tags);
+    if (params?.page) searchParams.set('page', params.page.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.sort) searchParams.set('sort', params.sort);
+    
+    const queryString = searchParams.toString();
+    return fetchJSON<PaginatedResponse<PromptSummary>>(
+      `/prompts${queryString ? `?${queryString}` : ''}`
+    );
+  },
+  
+  // Get filter options
+  getFilterOptions: () => fetchJSON<FilterOptionsResponse>('/filters'),
 
   // Chats
   getChats: () => fetchJSON<Chat[]>('/chats'),
