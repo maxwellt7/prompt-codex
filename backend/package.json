@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "prisma generate && prisma migrate deploy && tsc && cp -r src/prompts/*.json dist/prompts/",
-    "start": "node dist/index.js",
+    "build": "prisma generate && tsc && cp -r src/prompts/*.json dist/prompts/",
+    "start": "prisma migrate deploy && node dist/index.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
